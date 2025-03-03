@@ -28,10 +28,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YOUR_USERNAME/mcp-cursor-companion.git"
+    "url": "git+https://github.com/Rev4nchist/mcp-cursor-companion.git"
   },
   "bugs": {
-    "url": "https://github.com/YOUR_USERNAME/mcp-cursor-companion/issues"
+    "url": "https://github.com/Rev4nchist/mcp-cursor-companion/issues"
   },
-  "homepage": "https://github.com/YOUR_USERNAME/mcp-cursor-companion#readme"
+  "homepage": "https://github.com/Rev4nchist/mcp-cursor-companion#readme"
 } 
