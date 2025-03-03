@@ -1,0 +1,37 @@
+{
+  "name": "mcp-cursor-companion",
+  "version": "1.0.0",
+  "description": "A companion tool for Cursor IDE that enhances AI collaboration through MCP",
+  "main": "index.js",
+  "bin": {
+    "mcp-companion": "./bin/cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cursor",
+    "ide",
+    "ai",
+    "mcp",
+    "companion",
+    "collaboration"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^8.2.6",
+    "ora": "^5.4.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_USERNAME/mcp-cursor-companion.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/mcp-cursor-companion/issues"
+  },
+  "homepage": "https://github.com/YOUR_USERNAME/mcp-cursor-companion#readme"
+} 
