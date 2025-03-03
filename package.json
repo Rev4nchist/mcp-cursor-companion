@@ -1,7 +1,7 @@
 {
   "name": "mcp-cursor-companion",
-  "version": "1.1.0",
-  "description": "A companion tool for Cursor IDE that enhances AI collaboration through MCP",
+  "version": "1.2.0",
+  "description": "A companion tool for Cursor IDE that enhances AI collaboration through structured memory and project context",
   "main": "index.js",
   "bin": {
     "mcpCompanion": "./bin/cli.js"
@@ -15,9 +15,12 @@
     "ai",
     "mcp",
     "companion",
-    "collaboration"
+    "collaboration",
+    "memory",
+    "context",
+    "project-management"
   ],
-  "author": "",
+  "author": "MCP Team",
   "license": "MIT",
   "dependencies": {
     "chalk": "^4.1.2",
