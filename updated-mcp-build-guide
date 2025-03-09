@@ -1,0 +1,290 @@
+# Updated MCP Design Guide
+
+## Instructions for AI Assistant
+
+"I need you to master the creation of a high-quality, custom Model Context Protocol (MCP) server using a single-file TypeScript approach, ensuring it's effective, innovative, and seamlessly integrates with Windsurf and Cursor. The MCP server should be flexible enough to handle diverse requests, such as connecting to databases (e.g., email databases, SQL, NoSQL), performing web searches, interacting with APIs, or any other service I might need. Follow these steps, being proactive, helpful, and anticipating my needs based on the project context:
+
+1. **Understand MCP Fundamentals**:
+   - Explain MCP as an Anthropic standard for connecting AI tools to external services via a standardized protocol.
+   - Detail transport types: `stdio` for local interactions (Windsurf/Cursor) and `sse` for real-time updates (Cursor).
+
+2. **Analyze Project Context and User Request**:
+   - Examine project files (e.g., `package.json`, `.env`, schemas) and dependencies to identify technologies and goals.
+   - If my request is vague or lacks details, ask clarifying questions like:
+     - 'What specific service or data source do you want to connect to (e.g., email database, web search, API)?'
+     - 'What actions do you need to perform (e.g., querying data, sending emails, searching the web)?'
+     - 'What is the expected input and output format?'
+   - Use my responses to tailor the server to the specific use case.
+
+3. **Build a Flexible MCP Server in TypeScript**:
+   - Use a single file (e.g., `mcp_server.ts`), runnable with `tsx` (`npm install -g tsx`).
+   - Follow the structure from [www.aihero.dev/mcp-server-from-a-single-typescript-file](http://www.aihero.dev/mcp-server-from-a-single-typescript-file): import `@modelcontextprotocol/sdk`, define `McpServer`, add tools with Zod schemas, and handle messages.
+   - Suggest tools based on the use case:
+     - **Databases (e.g., email databases, SQL, NoSQL)**: Tools like `query_database`, `insert_record`, `update_record`, `delete_record`.
+     - **Web Searches**: Tools like `search_web`, `fetch_search_results`, using APIs like Google Search or web scraping libraries.
+     - **APIs**: Tools like `fetch_api_data`, `post_api_update` for RESTful interactions.
+     - **Email Services**: Tools like `send_email`, `fetch_emails` using libraries like Nodemailer or IMAP clients.
+     - **Real-Time Systems**: Tools like `track_changes`, `subscribe_to_updates` with `sse` transport.
+
+   **Example for an Email Database MCP Server**:
+   ```typescript
+   import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+   import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+   import { z } from 'zod';
+   import nodemailer from 'nodemailer'; // For email sending
+
+   const server = new McpServer({ name: 'EmailServer', version: '1.0.0' });
+
+   server.tool({
+     name: 'send_email',
+     description: 'Send an email via an SMTP server',
+     input: z.object({
+       to: z.string().email().describe('Recipient email address'),
+       subject: z.string().describe('Email subject'),
+       body: z.string().describe('Email body'),
+     }),
+     callback: async ({ to, subject, body }) => {
+       try {
+         const transporter = nodemailer.createTransport({
+           host: process.env.SMTP_HOST,
+           port: Number(process.env.SMTP_PORT),
+           auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+         });
+         await transporter.sendMail({ from: 'sender@example.com', to, subject, text: body });
+         return [{ type: 'text', text: 'Email sent successfully' }];
+       } catch (error) {
+         throw new Error(`Email send failed: ${error.message}`);
+       }
+     },
+   });
+
+   const transport = new StdioServerTransport();
+   await server.connect(transport);
+   ```
+
+4. **Configure for Windsurf and Cursor**:
+   - Windsurf: Update `mcp_config.json` with `{ "name": "CustomMcpServer", "transport": "stdio", "command": "tsx /path/to/mcp_server.ts" }`.
+   - Cursor: In Settings > Features > MCP, add the server with `stdio` or `sse` transport.
+
+5. **Proactive Feature Suggestions**:
+   - Based on the use case, suggest additional tools or integrations:
+     - For databases: caching, batch operations.
+     - For web searches: result filtering, pagination.
+     - For email: attachment handling, email threading.
+   - Propose integrations with other services (e.g., Slack for notifications, Notion for data storage) to enhance utility.
+
+6. **Ensure Quality, Security, and Flexibility**:
+   - Use environment variables for sensitive data (e.g., API keys, database credentials).
+   - Implement input validation with Zod and handle errors gracefully with meaningful messages.
+   - Suggest appropriate libraries or APIs for the task (e.g., Nodemailer for email, axios for HTTP requests).
+   - Ensure the server handles the expected data format and structure for the use case.
+
+7. **Tailor to User Expertise**:
+   - Assess my skill level dynamically. For beginners, provide simple tools and explanations; for advanced users, suggest optimizations like rate limiting or real-time updates.
+
+8. **Test and Iterate**:
+   - Provide sample messages for testing (e.g., `{'type': 'call', 'tool': 'send_email', 'input': {'to': 'user@example.com', 'subject': 'Test', 'body': 'Hello!'}}`).
+   - Encourage iteration based on feedback, such as adding new tools or improving error handling.
+
+9. **Be Proactive and Supportive**:
+   - Offer to generate documentation (e.g., README) explaining the server's tools and usage.
+   - Suggest sharing the server with the MCP community for feedback and inspiration.
+   - Reference resources like the [MCP Specification](https://github.com/anthropics/model-context-protocol), [Windsurf MCP Docs](https://docs.codeium.com/windsurf/cascade), and [Cursor MCP Docs](https://docs.cursor.com/context/model-context-protocol).
+
+## Information Required from Users
+
+To effectively set up a custom MCP server, the following information is needed from the user:
+
+### 1. Service Integration Requirements
+- **Specific service or data source** you want to connect to:
+  - What type of database do you need to connect to? (SQL, NoSQL, email database)
+  - Do you need web search capabilities?
+  - Which specific APIs do you need to interact with? (e.g., weather, finance, social media)
+  - Do you need email service integration?
+  - Are there other external systems you need to connect with?
+
+- **Authentication details** for these services:
+  - Do you have API keys for the services? (These will be stored as environment variables)
+  - What connection strings will be needed?
+  - What authentication methods are required? (OAuth, basic auth, etc.)
+
+### 2. Functional Requirements
+- **Actions you need to perform** with the MCP:
+  - Do you need to query data from databases?
+  - Will you be sending/receiving emails?
+  - Do you need to search the web?
+  - Will you be posting updates to services?
+  - Do you need real-time monitoring or notifications?
+
+- **Input and output formats** you expect:
+  - What data structures will you be working with?
+  - What response formats do you need? (JSON, XML, etc.)
+  - How should errors be handled and reported?
+
+### 3. Technical Environment
+- **Integration target**:
+  - Will you be using Windsurf, Cursor, or both?
+  - Where will the MCP server run?
+
+- **Transport preferences**:
+  - Do you need `stdio` for local interactions?
+  - Do you require `sse` for real-time updates?
+
+### 4. User Expertise Level
+- What is your familiarity with TypeScript and Node.js?
+- Have you worked with APIs before?
+- Do you have experience with MCP or similar protocols?
+
+### 5. Project Context
+- Can you share your existing project files and dependencies?
+- What is your current technology stack?
+- What are your project goals and constraints?
+
+### 6. Security Requirements
+- How sensitive is the data being handled?
+- Are there any compliance requirements to consider?
+- What are your preferences for handling credentials?
+
+### 7. Performance Expectations
+- What is the expected volume of requests?
+- Do you have specific response time requirements?
+- Do you need caching capabilities?
+
+## Implementation Process
+
+1. **Initial Assessment**:
+   - We'll start by understanding your specific needs using the questions above.
+   - We'll examine your existing codebase to identify integration points.
+
+2. **MCP Server Design**:
+   - Based on your requirements, we'll design a custom MCP server.
+   - We'll select appropriate tools and libraries for your use case.
+
+3. **Implementation**:
+   - We'll create a single TypeScript file implementing the MCP server.
+   - We'll use Zod for input validation and error handling.
+   - We'll implement the specific tools needed for your use case.
+
+4. **Configuration**:
+   - We'll set up the server to work with Windsurf, Cursor, or both.
+   - We'll configure environment variables for sensitive information.
+
+5. **Testing**:
+   - We'll provide sample messages for testing the server.
+   - We'll help you troubleshoot any issues that arise.
+
+6. **Documentation**:
+   - We'll generate documentation explaining the server's tools and usage.
+   - We'll provide examples of how to use the server in your application.
+
+7. **Iteration**:
+   - We'll refine the server based on your feedback.
+   - We'll add new tools or improve existing ones as needed.
+
+## Common Use Cases and Templates
+
+### Web Search MCP Server
+```typescript
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { z } from 'zod';
+import axios from 'axios';
+
+const server = new McpServer({ name: 'WebSearchServer', version: '1.0.0' });
+
+server.tool({
+  name: 'search_web',
+  description: 'Search the web for information',
+  input: z.object({
+    query: z.string().describe('Search query'),
+    numResults: z.number().optional().describe('Number of results to return'),
+  }),
+  callback: async ({ query, numResults = 5 }) => {
+    try {
+      const response = await axios.get('https://api.searchapi.com/search', {
+        params: { q: query, num: numResults },
+        headers: { 'X-API-KEY': process.env.SEARCH_API_KEY }
+      });
+      return [{ type: 'text', text: JSON.stringify(response.data.results) }];
+    } catch (error) {
+      throw new Error(`Web search failed: ${error.message}`);
+    }
+  },
+});
+
+const transport = new StdioServerTransport();
+await server.connect(transport);
+```
+
+### Database Query MCP Server
+```typescript
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { z } from 'zod';
+import { Pool } from 'pg';
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+const server = new McpServer({ name: 'DatabaseServer', version: '1.0.0' });
+
+server.tool({
+  name: 'query_database',
+  description: 'Execute a SQL query against the database',
+  input: z.object({
+    query: z.string().describe('SQL query to execute'),
+    params: z.array(z.any()).optional().describe('Query parameters'),
+  }),
+  callback: async ({ query, params = [] }) => {
+    try {
+      const client = await pool.connect();
+      try {
+        const result = await client.query(query, params);
+        return [{ type: 'text', text: JSON.stringify(result.rows) }];
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      throw new Error(`Database query failed: ${error.message}`);
+    }
+  },
+});
+
+const transport = new StdioServerTransport();
+await server.connect(transport);
+```
+
+## Troubleshooting Guide
+
+### Common Issues and Solutions
+
+1. **Connection Issues**
+   - **Problem**: MCP server fails to connect to external service
+   - **Solution**: Verify network connectivity, check API keys and credentials, ensure service endpoints are correct
+
+2. **Authentication Errors**
+   - **Problem**: "Unauthorized" or "Authentication failed" errors
+   - **Solution**: Double-check API keys, verify OAuth tokens are valid and not expired, ensure correct authentication method is used
+
+3. **Transport Configuration**
+   - **Problem**: Windsurf or Cursor cannot connect to MCP server
+   - **Solution**: Verify `mcp_config.json` has correct path and command, ensure server is executable, check transport type matches configuration
+
+4. **Data Format Issues**
+   - **Problem**: Unexpected data format errors
+   - **Solution**: Add more robust validation with Zod, implement data transformation functions, log input/output for debugging
+
+5. **Performance Problems**
+   - **Problem**: Slow response times
+   - **Solution**: Implement caching, optimize queries, add pagination for large result sets, consider connection pooling
+
+## Resources
+
+- [MCP Specification](https://github.com/anthropics/model-context-protocol)
+- [Windsurf MCP Documentation](https://docs.codeium.com/windsurf/cascade)
+- [Cursor MCP Documentation](https://docs.cursor.com/context/model-context-protocol)
+- [Example MCP Server](http://www.aihero.dev/mcp-server-from-a-single-typescript-file)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+- [Zod Schema Validation](https://zod.dev/)
+- [Node.js Environment Variables](https://nodejs.org/api/process.html#process_process_env)
